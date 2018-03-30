@@ -7,22 +7,37 @@ namespace Delegates
         static void Main(string[] args)
         {
             var photoProcessor = new PhotoProcessor();
-            photoProcessor.Process();
+            var filters = new PhotoFilters();
+            var transform = new Transformations();
+
+            PhotoProcessor.PhotoFilterHandler filterHandler = filters.ApplyBrightness;
+            filterHandler += filters.ApplyContrast;
+            filterHandler += filters.Resize;
+            filterHandler += transform.Crop;
+
+            photoProcessor.Process(filterHandler);
+
+            Console.ReadLine();
         }
     }
 
+    public class Transformations
+    {
+        public void Crop(Photo photo)
+        {
+            Console.WriteLine("Cropping...");
+        }
+    }
 
     public class PhotoProcessor
     {
+        public delegate void PhotoFilterHandler(Photo photo);
 
-        public void Process()
+        public void Process(PhotoFilterHandler filterHandler)
         {
             var photo = new Photo();
 
-            var filters = new PhotoFilters();
-            filters.ApplyBrightness(photo);
-            filters.ApplyContrast(photo);
-            filters.Resize(photo);
+            filterHandler(photo);
 
             photo.Save();
         }
